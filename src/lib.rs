@@ -1,8 +1,15 @@
 // CHANGE THIS (PLACEHOLDER)
 #![allow(unexpected_cfgs)]
-use pinocchio::{AccountView, entrypoint, Address, ProgramResult, address::declare_id, error::ProgramError};
+use pinocchio::{
+    address::declare_id, entrypoint, error::ProgramError, AccountView, Address, ProgramResult,
+};
 
-use crate::instructions::EscrowInstrctions;
+use crate::instructions::FundraiserInstructions;
+
+mod constants;
+mod instructions;
+mod state;
+mod tests;
 
 entrypoint!(process_instruction);
 
@@ -13,14 +20,25 @@ pub fn process_instruction(
     accounts: &[AccountView],
     instruction_data: &[u8],
 ) -> ProgramResult {
-
     assert_eq!(program_id, &ID);
 
-    let (discriminator, data) = instruction_data.split_first()
+    let (discriminator, data) = instruction_data
+        .split_first()
         .ok_or(ProgramError::InvalidInstructionData)?;
 
-    match EscrowInstrctions::try_from(discriminator)? {
-        EscrowInstrctions::Make => instructions::process_make_instruction(accounts, data)?,
+    match FundraiserInstructions::try_from(discriminator)? {
+        FundraiserInstructions::Initialize => {
+            instructions::process_initialize_instruction(program_id, accounts, instruction_data)?
+        }
+        FundraiserInstructions::Checker => {
+            instructions::process_checker_instruction(program_id, accounts, instruction_data)?
+        }
+        FundraiserInstructions::Contribute => {
+            instructions::process_contribute_instruction(program_id, accounts, instruction_data)?
+        }
+        FundraiserInstructions::Refund => {
+            instructions::process_refund_instruction(program_id, accounts, instruction_data)?
+        }
         // EscrowInstrctions::MakeV2 => instructions::process_make_instruction_v2(accounts, data)?,
         _ => return Err(ProgramError::InvalidInstructionData),
     }
