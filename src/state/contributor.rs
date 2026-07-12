@@ -6,6 +6,8 @@ use pinocchio::{error::ProgramError, AccountView};
 pub struct Contributor {
     // 8 bytes
     pub amount: u64,
+    pub bump: u8,
+    _padding: [u8; 7],
 }
 
 impl Contributor {
