@@ -101,6 +101,9 @@ pub fn process_checker_instruction(
             }
             _ => {
                 // if raise failed
+                return Err(ProgramError::Custom(
+                    FundraiserError::FundraiserNotEnded as u32,
+                ));
             }
         }
     }

@@ -5,4 +5,6 @@ pub enum FundraiserError {
     FundraiserEnded = 2,
     FundraiserNotEnded = 3,
     MaximumContributionsReached = 4,
+    RefundAlreadyOrNotContributed = 5,
+    InsufficientFund = 6,
 }
