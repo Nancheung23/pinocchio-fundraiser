@@ -1,4 +1,7 @@
+pub mod test_checker;
+pub mod test_contribute;
 pub mod test_initialize;
+pub mod test_refund;
 
 use litesvm::LiteSVM;
 use solana_sdk::{

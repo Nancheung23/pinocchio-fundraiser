@@ -48,6 +48,7 @@ pub fn process_contribute_instruction(
     // instruction
     // amount: 8 bytes
     if instruction_data.len() != 8 {
+        log!("Instruction length: {}", instruction_data.len());
         return Err(ProgramError::InvalidInstructionData);
     };
     // get amount

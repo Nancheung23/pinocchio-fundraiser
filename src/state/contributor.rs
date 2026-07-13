@@ -11,7 +11,7 @@ pub struct Contributor {
 }
 
 impl Contributor {
-    pub const LEN: usize = 8;
+    pub const LEN: usize = 16;
     pub fn from_contributor_info(info: &AccountView) -> Result<&mut Self, ProgramError> {
         let mut data = info.try_borrow_mut()?;
         if data.len() != Self::LEN {
