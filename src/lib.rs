@@ -1,47 +1,60 @@
-// CHANGE THIS (PLACEHOLDER)
 #![allow(unexpected_cfgs)]
-use pinocchio::{
-    address::declare_id, entrypoint, error::ProgramError, AccountView, Address, ProgramResult,
-};
-
-use crate::instructions::FundraiserInstructions;
-
 mod constants;
 mod error;
 mod instructions;
 mod state;
+
+#[cfg(test)]
 mod tests;
 
-entrypoint!(process_instruction);
+use instructions::*;
+use pinocchio::error::ProgramError;
+use pinocchio::{address::declare_id, entrypoint, AccountView, Address, ProgramResult};
 
+entrypoint!(process_instruction);
 declare_id!("4ibrEMW5F6hKnkW4jVedswYv6H6VtwPN6ar6dvXDN1nT");
+#[derive(Clone, Copy, Debug)]
+#[repr(u8)]
+pub enum FundraiserInstructions {
+    Initialize = 0,
+    Contribute = 1,
+    Checker = 2,
+    Refund = 3,
+}
+
+impl TryFrom<&u8> for FundraiserInstructions {
+    type Error = ProgramError;
+
+    fn try_from(value: &u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Initialize),
+            1 => Ok(Self::Contribute),
+            2 => Ok(Self::Checker),
+            3 => Ok(Self::Refund),
+            _ => Err(ProgramError::InvalidInstructionData),
+        }
+    }
+}
 
 pub fn process_instruction(
     program_id: &Address,
     accounts: &[AccountView],
     instruction_data: &[u8],
 ) -> ProgramResult {
-    assert_eq!(program_id, &ID);
-
     let (discriminator, data) = instruction_data
         .split_first()
         .ok_or(ProgramError::InvalidInstructionData)?;
 
-    match FundraiserInstructions::try_from(discriminator)? {
+    let instruction = FundraiserInstructions::try_from(discriminator)?;
+
+    match instruction {
         FundraiserInstructions::Initialize => {
-            instructions::process_initialize_instruction(program_id, accounts, instruction_data)?
-        }
-        FundraiserInstructions::Checker => {
-            instructions::process_checker_instruction(program_id, accounts, instruction_data)?
+            process_initialize_instruction(program_id, accounts, data)
         }
         FundraiserInstructions::Contribute => {
-            instructions::process_contribute_instruction(program_id, accounts, instruction_data)?
+            process_contribute_instruction(program_id, accounts, data)
         }
-        FundraiserInstructions::Refund => {
-            instructions::process_refund_instruction(program_id, accounts, instruction_data)?
-        }
-        // EscrowInstrctions::MakeV2 => instructions::process_make_instruction_v2(accounts, data)?,
-        _ => return Err(ProgramError::InvalidInstructionData),
+        FundraiserInstructions::Checker => process_checker_instruction(program_id, accounts, data),
+        FundraiserInstructions::Refund => process_refund_instruction(program_id, accounts, data),
     }
-    Ok(())
 }
